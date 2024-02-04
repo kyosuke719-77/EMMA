@@ -9,6 +9,8 @@ def main():
     main_window.title('EMMA')
     main_window.geometry("600x200")
 
+    main_window.mainloop()
+
 if __name__ == '__main__':
     main()
 

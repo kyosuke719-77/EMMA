@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import itertools
 import tkinter
 import tkinter.filedialog
 from tkinter import ttk
@@ -31,7 +32,8 @@ def execute_emma():
     check = bool_val.get()
 
     df = pd.read_csv(file_path)
-    data_size = df.to_numpy().shape
+    data = df.to_numpy()
+    data_size = data.shape
 
     #入力データが1次元配列であるとき
     if data_size[0] == 0:
@@ -39,7 +41,13 @@ def execute_emma():
         data_size[0] = 1
     print(tuple(data_size))
 
-    #全データを1系列として
+    
+
+
+
+    #全データを1系列に変換する
+    if check == True:
+        data = list(itertools.chain.from_iterable(data))
 
 
 
@@ -51,7 +59,7 @@ def emma(data, data_size, minsup):
         count_of_support = {}
 
         #step1-3
-        [count_of_support.setdefault(sequence[i], []).append(i) for i in range(data_size[1])] #eventのsupportを数える
+        [count_of_support.setdefault(sequence[i], []).append(i) for i in range(len(sequence))] #eventのsupportを数える
         occurr = {key:value for key, value in count_of_support.items() if len(value) >= minsup} #sup >= minsup のeventだけ保持
         compositte_episode = occurr.copy()
         key_list = list(occurr.keys())

@@ -4,6 +4,7 @@ import itertools
 import tkinter
 import tkinter.filedialog
 from tkinter import ttk
+from tkinter import messagebox
 import os
 import re
 
@@ -25,33 +26,48 @@ def isOk(value):
     return False
 
 
-def execute_emma():
+#必須項目が全て入力されているかどうかをチェック
+def exe_judge():
     file_path = file_select.get()
     file_name = result_name.get()
     minsup = minsup_value.get()
+
+    if file_path != '' and file_name != '' and minsup != '':
+        execute_emma()
+    else:
+        messagebox.showerror('エラー', '入力していない項目があります')
+
+
+def execute_emma():
+    file_path = file_select.get()
+    file_name = result_name.get()
+    minsup = int(minsup_value.get())
     check = bool_val.get()
 
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, header=None)
     data = df.to_numpy()
-    data_size = data.shape
 
-    #入力データが1次元配列であるとき
-    if data_size[0] == 0:
-        data_size = list(data_size)
-        data_size[0] = 1
-    print(tuple(data_size))
-
-    
-
-
+    #入力データからnanを取り除く
+    data = [[value for value in arr if not np.isnan(value)]  for arr in data]
 
     #全データを1系列に変換する
     if check == True:
-        data = list(itertools.chain.from_iterable(data))
+        data = [list(itertools.chain.from_iterable(data))]
 
+    result = emma(data, minsup)
 
+    for idx, elem in enumerate(result):
+        keys_list = elem.keys()
 
-def emma(data, data_size, minsup):
+        with open(f'{file_name}_{idx}.txt', 'w', encoding='utf-8') as f:
+            for key in keys_list:
+                f.write(f'{key}:{elem[key]}\n')
+
+    messagebox.showinfo('実行完了', 'エピソードマイニングが完了しました')
+    main_window.destroy()
+    
+
+def emma(data, minsup):
     episodes = []
     global compositte_episode
     
@@ -146,7 +162,7 @@ if __name__ == '__main__':
     check_box.place(x=20, y=115)
 
     #実行ボタン
-    run_button = ttk.Button(text='実行', command=execute_emma)
+    run_button = ttk.Button(text='実行', command=exe_judge)
     run_button.place(x=200, y=145)
 
     main_window.mainloop()
